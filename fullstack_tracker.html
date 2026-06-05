@@ -1,0 +1,1535 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>26-Week FullStack Tracker</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --bg: #0d0d0d;
+        --bg1: #111111;
+        --bg2: #161616;
+        --bg3: #1c1c1c;
+        --line: #252525;
+        --line2: #2e2e2e;
+        --dim: #444444;
+        --muted: #666666;
+        --sub: #888888;
+        --body: #b0b0b0;
+        --text: #e0e0e0;
+        --bright: #f0f0f0;
+        --green: #10bc4f;
+        --green-dim: #1a3327;
+        --amber: #f59e0b;
+        --amber-dim: #2d2008;
+        --blue: #60a5fa;
+        --blue-dim: #0f1e35;
+        --mono: "JetBrains Mono", monospace;
+        --r: 4px;
+      }
+
+      body {
+        font-family: var(--mono);
+        background: var(--bg);
+        color: var(--body);
+        min-height: 100vh;
+        font-size: 15px;
+        line-height: 1.6;
+      }
+
+      /* ── LAYOUT ── */
+      .shell {
+        margin: 0 auto;
+        padding: 0 50px 80px;
+      }
+
+      /* ── HEADER ── */
+      .hdr {
+        padding: 40px 0 28px;
+        border-bottom: 1px solid var(--line);
+      }
+      .hdr-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 16px;
+      }
+      .hdr-title {
+        font-size: 20px;
+        font-weight: 500;
+        color: var(--bright);
+        letter-spacing: -0.3px;
+      }
+      .hdr-title span {
+        color: var(--green);
+      }
+      .hdr-meta {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 6px;
+      }
+      .hdr-meta b {
+        color: var(--sub);
+        font-weight: 400;
+      }
+
+      .stats {
+        display: flex;
+        gap: 32px;
+      }
+      .stat {
+        text-align: right;
+      }
+      .stat-n {
+        font-size: 22px;
+        font-weight: 500;
+        color: var(--text);
+      }
+      .stat-l {
+        font-size: 10px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        margin-top: 1px;
+      }
+      #n-done {
+        color: var(--green);
+      }
+      #n-prog {
+        color: var(--amber);
+      }
+
+      /* ── PROGRESS ── */
+      .prog-bar-wrap {
+        margin-top: 20px;
+      }
+      .prog-bar-meta {
+        display: flex;
+        justify-content: space-between;
+        font-size: 11px;
+        color: var(--muted);
+        margin-bottom: 7px;
+      }
+      .prog-track {
+        height: 2px;
+        background: var(--line2);
+      }
+      .prog-fill {
+        height: 100%;
+        width: 0%;
+        background: var(--green);
+        transition: width 0.5s ease;
+      }
+
+      /* ── PHASE NAV ── */
+      .phase-nav {
+        display: flex;
+        gap: 0;
+        border-bottom: 1px solid var(--line);
+        margin-top: 32px;
+        overflow-x: auto;
+        scrollbar-width: none;
+      }
+      .phase-nav::-webkit-scrollbar {
+        display: none;
+      }
+      .ph-btn {
+        font-family: var(--mono);
+        font-size: 11px;
+        font-weight: 400;
+        color: var(--muted);
+        background: none;
+        border: none;
+        border-bottom: 1px solid transparent;
+        padding: 10px 20px 11px;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: color 0.15s;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .ph-btn:hover {
+        color: var(--body);
+      }
+      .ph-btn.on {
+        color: var(--green);
+        border-bottom-color: var(--green);
+      }
+
+      /* ── PHASE PANEL ── */
+      .phase-panel {
+        display: none;
+      }
+      .phase-panel.on {
+        display: block;
+      }
+
+      .milestone-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 0 20px;
+        border-bottom: 1px solid var(--line);
+        margin-bottom: 24px;
+        font-size: 11px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .milestone-row::before {
+        content: "";
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        border: 1px solid var(--green);
+        background: var(--green);
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      .milestone-row span {
+        color: var(--green);
+      }
+
+      /* ── WEEK LIST ── */
+      .week-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+      }
+
+      /* ── WEEK ROW ── */
+      .wrow {
+        background: var(--bg1);
+        border: 1px solid var(--line);
+        border-radius: var(--r);
+        overflow: hidden;
+      }
+      .wrow.s-done {
+        border-left: 2px solid var(--green);
+      }
+      .wrow.s-prog {
+        border-left: 2px solid var(--amber);
+      }
+      .wrow.s-pending {
+        border-left: 2px solid transparent;
+      }
+
+      .wrow-head {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        cursor: pointer;
+        user-select: none;
+      }
+      .wrow-head:hover {
+        background: var(--bg2);
+      }
+
+      .wnum {
+        font-size: 10px;
+        color: var(--dim);
+        min-width: 40px;
+        flex-shrink: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .wtopic {
+        font-size: 13px;
+        color: var(--text);
+        font-weight: 500;
+        flex: 1;
+      }
+      .wassign {
+        font-size: 11px;
+        color: var(--muted);
+        flex: 1;
+      }
+      .wbadge {
+        font-size: 10px;
+        padding: 2px 8px;
+        border-radius: 2px;
+        flex-shrink: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 500;
+      }
+      .badge-done {
+        background: var(--green-dim);
+        color: var(--green);
+      }
+      .badge-prog {
+        background: var(--amber-dim);
+        color: var(--amber);
+      }
+      .badge-pending {
+        background: var(--bg3);
+        color: var(--dim);
+      }
+
+      .wdate {
+        font-size: 11px;
+        color: var(--muted);
+        min-width: 80px;
+        text-align: right;
+        flex-shrink: 0;
+      }
+
+      /* ── EXPAND ── */
+      .wrow-body {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+        border-top: 0px solid var(--line);
+      }
+      .wrow-body.open {
+        max-height: 700px;
+        border-top: 1px solid var(--line);
+      }
+
+      .body-inner {
+        padding: 20px 16px 20px 68px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+
+      .sect-head {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: var(--muted);
+        margin-bottom: 8px;
+      }
+      .sect-body {
+        font-size: 12px;
+        color: var(--sub);
+        line-height: 1.7;
+      }
+      .sect-body a {
+        color: var(--blue);
+        text-decoration: none;
+      }
+      .sect-body a:hover {
+        text-decoration: underline;
+      }
+
+      .resource-list {
+        list-style: none;
+      }
+      .resource-list li {
+        display: flex;
+        align-items: flex-start;
+        gap: 6px;
+        margin-bottom: 4px;
+        font-size: 12px;
+        color: var(--sub);
+      }
+      .resource-list li::before {
+        content: "→";
+        color: var(--dim);
+        flex-shrink: 0;
+        margin-top: 1px;
+      }
+
+      .focus-tag {
+        display: inline-block;
+        background: var(--blue-dim);
+        color: var(--blue);
+        border-radius: 2px;
+        padding: 2px 8px;
+        font-size: 11px;
+        margin-right: 4px;
+        margin-bottom: 4px;
+      }
+
+      /* ── FORM SECTION ── */
+      .form-sect {
+        grid-column: 1/-1;
+        padding-top: 16px;
+        border-top: 1px solid var(--line);
+      }
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr 2fr;
+        gap: 10px;
+        align-items: end;
+      }
+
+      label.fl {
+        font-size: 10px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: block;
+        margin-bottom: 5px;
+      }
+      select,
+      input[type="date"],
+      textarea {
+        font-family: var(--mono);
+        font-size: 12px;
+        background: var(--bg);
+        border: 1px solid var(--line2);
+        border-radius: var(--r);
+        color: var(--text);
+        padding: 7px 10px;
+        outline: none;
+        width: 100%;
+        transition: border-color 0.15s;
+      }
+      select:focus,
+      input[type="date"]:focus,
+      textarea:focus {
+        border-color: var(--dim);
+      }
+      option {
+        background: var(--bg2);
+      }
+      textarea {
+        resize: vertical;
+        min-height: 52px;
+      }
+
+      .notes-wrap {
+        grid-column: 1/-1;
+      }
+      .notes-wrap textarea {
+        min-height: 60px;
+      }
+
+      .save-row {
+        grid-column: 1/-1;
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 4px;
+      }
+      .save-btn {
+        font-family: var(--mono);
+        font-size: 11px;
+        font-weight: 500;
+        padding: 7px 20px;
+        background: none;
+        border: 1px solid var(--line2);
+        color: var(--sub);
+        border-radius: var(--r);
+        cursor: pointer;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: all 0.15s;
+      }
+      .save-btn:hover {
+        border-color: var(--green);
+        color: var(--green);
+      }
+
+      /* ── RESPONSIVE ── */
+      @media (max-width: 680px) {
+        .stats {
+          gap: 20px;
+        }
+        .body-inner {
+          grid-template-columns: 1fr;
+          padding: 16px;
+        }
+        .form-row {
+          grid-template-columns: 1fr 1fr;
+        }
+        .wassign {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <!-- HEADER -->
+      <header class="hdr">
+        <div class="hdr-top">
+          <div>
+            <div class="hdr-title">fullstack/<span>tracker</span></div>
+            <div class="hdr-meta">
+              26-week mentorship plan &nbsp;·&nbsp; <b>target:</b> ₹8–15 LPA
+              &nbsp;·&nbsp; <b>stack:</b> Node · TS · PostgreSQL · Redis ·
+              Docker · AWS
+            </div>
+          </div>
+          <div class="stats">
+            <div class="stat">
+              <div class="stat-n" id="n-done">0</div>
+              <div class="stat-l">Done</div>
+            </div>
+            <div class="stat">
+              <div class="stat-n" id="n-prog">0</div>
+              <div class="stat-l">Active</div>
+            </div>
+            <div class="stat">
+              <div class="stat-n" id="n-rem">26</div>
+              <div class="stat-l">Left</div>
+            </div>
+          </div>
+        </div>
+        <div class="prog-bar-wrap">
+          <div class="prog-bar-meta">
+            <span>progress</span>
+            <span id="pct-lbl">0 / 26 weeks complete</span>
+          </div>
+          <div class="prog-track">
+            <div class="prog-fill" id="prog-fill"></div>
+          </div>
+        </div>
+      </header>
+
+      <!-- PHASE NAV -->
+      <nav class="phase-nav" id="phase-nav"></nav>
+
+      <!-- PANELS -->
+      <div id="panels"></div>
+    </div>
+    <script>
+      const WEEKS = [
+        {
+          w: 1,
+          ph: 0,
+          topic: "Node.js Event Loop, Streams & Buffers",
+          assign: "CSV Parser",
+          project:
+            "Build a CLI tool that reads a large CSV file using Node.js Streams, parses it row-by-row without loading into memory, and outputs filtered results to stdout.",
+          interview: [
+            "Event loop phases",
+            "Microtasks vs macrotasks",
+            "Streams vs Buffers",
+            "Backpressure",
+          ],
+          resources: [
+            {
+              label: "Node.js Docs – Event Loop",
+              url: "https://nodejs.org/en/docs/guides/event-loop-timers-and-nexttick",
+            },
+            {
+              label: "Node.js Docs – Stream API",
+              url: "https://nodejs.org/api/stream.html",
+            },
+            {
+              label: "YouTube – Hussein Nasser: Node.js Event Loop",
+              url: "https://www.youtube.com/results?search_query=node+js+event+loop+hussein+nasser",
+            },
+            {
+              label: "GitHub – stream-handbook",
+              url: "https://github.com/substack/stream-handbook",
+            },
+          ],
+        },
+        {
+          w: 2,
+          ph: 0,
+          topic: "Node.js Performance & Worker Threads",
+          assign: "Image Processing API",
+          project:
+            "Build an Express API that accepts image uploads and processes them (resize, grayscale) using Worker Threads to avoid blocking the event loop. Compare throughput with/without workers.",
+          interview: [
+            "Worker threads vs child_process",
+            "CPU-bound vs I/O-bound tasks",
+            "Thread pool (libuv)",
+          ],
+          resources: [
+            {
+              label: "Node.js Docs – Worker Threads",
+              url: "https://nodejs.org/api/worker_threads.html",
+            },
+            {
+              label: "sharp – image processing library",
+              url: "https://sharp.pixelplumbing.com",
+            },
+            {
+              label: "YouTube – Fireship: Node.js multithreading",
+              url: "https://www.youtube.com/results?search_query=node+js+worker+threads+fireship",
+            },
+          ],
+        },
+        {
+          w: 3,
+          ph: 0,
+          topic: "TypeScript Fundamentals",
+          assign: "Convert Express Project to TS",
+          project:
+            "Take an existing plain JS Express app (or build a simple one) and fully migrate it to TypeScript. Add strict tsconfig, typed route handlers, and typed middleware.",
+          interview: [
+            "Types vs Interfaces",
+            "Structural typing",
+            "any vs unknown vs never",
+            "type narrowing",
+          ],
+          resources: [
+            {
+              label: "TypeScript Official Docs",
+              url: "https://www.typescriptlang.org/docs/",
+            },
+            {
+              label: "Matt Pocock – Total TypeScript (free tutorials)",
+              url: "https://www.totaltypescript.com/tutorials",
+            },
+            {
+              label: "YouTube – Traversy Media: TypeScript Crash Course",
+              url: "https://www.youtube.com/results?search_query=traversy+media+typescript+crash+course",
+            },
+            {
+              label: "TypeScript Exercises",
+              url: "https://typescript-exercises.github.io",
+            },
+          ],
+        },
+        {
+          w: 4,
+          ph: 0,
+          topic: "Advanced TypeScript",
+          assign: "Typed API Layer",
+          project:
+            "Build a fully type-safe REST API layer using generics and utility types. Create reusable generic repository and service classes. Use Zod for runtime validation paired with inferred TS types.",
+          interview: [
+            "Generics",
+            "Conditional types",
+            "Mapped types",
+            "Utility types (Partial, Pick, Omit, ReturnType)",
+          ],
+          resources: [
+            {
+              label: "TypeScript Handbook – Generics",
+              url: "https://www.typescriptlang.org/docs/handbook/2/generics.html",
+            },
+            { label: "Zod Documentation", url: "https://zod.dev" },
+            {
+              label: "Matt Pocock – Advanced TypeScript patterns",
+              url: "https://www.totaltypescript.com/books/total-typescript-essentials",
+            },
+            {
+              label: "Type Challenges (practice repo)",
+              url: "https://github.com/type-challenges/type-challenges",
+            },
+          ],
+        },
+        {
+          w: 5,
+          ph: 0,
+          topic: "REST API Design",
+          assign: "Production-grade API",
+          project:
+            "Design and build a complete REST API for a blog platform (posts, users, comments). Follow REST conventions strictly: proper status codes, pagination, filtering, versioning (/api/v1), and OpenAPI (Swagger) documentation.",
+          interview: [
+            "REST constraints",
+            "Idempotency",
+            "HTTP status codes",
+            "Pagination strategies",
+            "HATEOAS",
+          ],
+          resources: [
+            {
+              label: "REST API Design Best Practices (freeCodeCamp)",
+              url: "https://www.freecodecamp.org/news/rest-api-best-practices-rest-endpoint-design-examples/",
+            },
+            {
+              label: "Swagger / OpenAPI Docs",
+              url: "https://swagger.io/docs/",
+            },
+            {
+              label: "HTTP Status Codes Reference",
+              url: "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status",
+            },
+            {
+              label: "YouTube – Mosh: Node.js REST API",
+              url: "https://www.youtube.com/results?search_query=mosh+node+js+rest+api",
+            },
+          ],
+        },
+        {
+          w: 6,
+          ph: 0,
+          topic: "Authentication & RBAC",
+          assign: "Auth Service",
+          project:
+            "Build a standalone auth microservice with: register/login with bcrypt, JWT access + refresh token rotation, email verification, RBAC middleware (admin/user/guest roles), and rate-limited auth endpoints.",
+          interview: [
+            "JWT structure & signing",
+            "Refresh token rotation",
+            "bcrypt cost factor",
+            "RBAC vs ABAC",
+            "Session vs stateless auth",
+          ],
+          resources: [
+            {
+              label: "JWT.io Introduction",
+              url: "https://jwt.io/introduction",
+            },
+            {
+              label: "OWASP Authentication Cheatsheet",
+              url: "https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html",
+            },
+            {
+              label: "YouTube – Web Dev Simplified: JWT Auth",
+              url: "https://www.youtube.com/results?search_query=web+dev+simplified+jwt+authentication",
+            },
+            {
+              label: "Passport.js Docs",
+              url: "https://www.passportjs.org/docs/",
+            },
+          ],
+        },
+        {
+          w: 7,
+          ph: 1,
+          topic: "PostgreSQL Basics",
+          assign: "Schema Design",
+          project:
+            "Design a normalized database schema for an e-learning platform (users, courses, lessons, enrollments, progress). Write DDL with constraints, indexes, and seed data. Query with filtering, sorting, and aggregation.",
+          interview: [
+            "1NF / 2NF / 3NF normalization",
+            "Primary vs foreign keys",
+            "Indexes overview",
+            "EXPLAIN ANALYZE",
+          ],
+          resources: [
+            {
+              label: "PostgreSQL Official Docs",
+              url: "https://www.postgresql.org/docs/current/",
+            },
+            {
+              label: "pgExercises – interactive SQL practice",
+              url: "https://pgexercises.com",
+            },
+            {
+              label: "YouTube – Hussein Nasser: PostgreSQL fundamentals",
+              url: "https://www.youtube.com/results?search_query=hussein+nasser+postgresql",
+            },
+            {
+              label: "Use The Index, Luke!",
+              url: "https://use-the-index-luke.com",
+            },
+          ],
+        },
+        {
+          w: 8,
+          ph: 1,
+          topic: "Relations & Transactions",
+          assign: "Ecommerce DB",
+          project:
+            "Build the database for an ecommerce system: products, categories, orders, order_items, payments. Implement ACID transactions for checkout (deduct inventory + create order atomically). Handle partial failures with ROLLBACK.",
+          interview: [
+            "ACID properties",
+            "Isolation levels",
+            "Deadlocks",
+            "Optimistic vs pessimistic locking",
+            "CASCADE behavior",
+          ],
+          resources: [
+            {
+              label: "PostgreSQL – Transactions",
+              url: "https://www.postgresql.org/docs/current/tutorial-transactions.html",
+            },
+            {
+              label: "PostgreSQL – Isolation Levels",
+              url: "https://www.postgresql.org/docs/current/transaction-iso.html",
+            },
+            {
+              label: "YouTube – CMU Database Group lectures",
+              url: "https://www.youtube.com/results?search_query=cmu+database+transactions",
+            },
+            { label: "SQL Style Guide", url: "https://www.sqlstyle.guide" },
+          ],
+        },
+        {
+          w: 9,
+          ph: 1,
+          topic: "Advanced SQL",
+          assign: "100 SQL Problems",
+          project:
+            "Complete 50 problems on LeetCode SQL + 50 on pgExercises. Focus on: window functions (ROW_NUMBER, RANK, LAG/LEAD), CTEs, recursive queries, EXPLAIN plans, and query optimization using indexes.",
+          interview: [
+            "Window functions",
+            "CTEs vs subqueries",
+            "Index types (B-tree, Hash, GIN)",
+            "Query planner",
+            "VACUUM & ANALYZE",
+          ],
+          resources: [
+            {
+              label: "LeetCode – SQL Study Plan",
+              url: "https://leetcode.com/studyplan/top-sql-50/",
+            },
+            {
+              label: "Mode SQL Tutorial – Window Functions",
+              url: "https://mode.com/sql-tutorial/sql-window-functions/",
+            },
+            {
+              label: "PostgreSQL – Window Functions",
+              url: "https://www.postgresql.org/docs/current/tutorial-window.html",
+            },
+            {
+              label: "Explain Depesz – EXPLAIN visualizer",
+              url: "https://explain.depesz.com",
+            },
+          ],
+        },
+        {
+          w: 10,
+          ph: 1,
+          topic: "Prisma ORM",
+          assign: "Prisma Backend",
+          project:
+            "Refactor the Week 5 REST API to use Prisma as the ORM. Write the full schema, run migrations, seed data, and implement complex queries using Prisma's relation queries. Add soft delete and audit fields.",
+          interview: [
+            "Prisma vs TypeORM vs Sequelize",
+            "N+1 problem & how Prisma solves it",
+            "Migration workflow",
+            "Prisma transaction API",
+          ],
+          resources: [
+            {
+              label: "Prisma Official Docs",
+              url: "https://www.prisma.io/docs",
+            },
+            {
+              label: "Prisma – Data Modeling",
+              url: "https://www.prisma.io/docs/orm/prisma-schema/data-model",
+            },
+            {
+              label: "YouTube – Theo (t3.gg): Prisma deep dive",
+              url: "https://www.youtube.com/results?search_query=prisma+orm+deep+dive+t3",
+            },
+            {
+              label: "Prisma – Performance Tips",
+              url: "https://www.prisma.io/docs/guides/performance-and-optimization",
+            },
+          ],
+        },
+        {
+          w: 11,
+          ph: 1,
+          topic: "Redis Basics",
+          assign: "Caching Layer",
+          project:
+            "Add Redis caching to the Prisma backend: cache expensive DB queries (TTL-based), cache user sessions, implement a leaderboard using Sorted Sets, and a pub/sub channel for live notifications.",
+          interview: [
+            "Redis data structures",
+            "Cache invalidation strategies",
+            "TTL vs LRU eviction",
+            "Redis persistence (RDB vs AOF)",
+          ],
+          resources: [
+            { label: "Redis Official Docs", url: "https://redis.io/docs/" },
+            {
+              label: "Redis University – RU101 (free)",
+              url: "https://university.redis.com",
+            },
+            {
+              label: "YouTube – Fireship: Redis in 100 seconds",
+              url: "https://www.youtube.com/results?search_query=fireship+redis+100+seconds",
+            },
+            {
+              label: "ioredis – Node.js client",
+              url: "https://github.com/redis/ioredis",
+            },
+          ],
+        },
+        {
+          w: 12,
+          ph: 1,
+          topic: "Rate Limiting & Session Management",
+          assign: "Secure API",
+          project:
+            "Harden the existing API: add Redis-backed sliding window rate limiting per IP and per user, implement distributed session storage, add request fingerprinting, and CSRF protection for cookie-based flows.",
+          interview: [
+            "Fixed window vs sliding window rate limiting",
+            "Token bucket algorithm",
+            "CSRF vs XSS",
+            "SameSite cookie attribute",
+          ],
+          resources: [
+            {
+              label: "express-rate-limit docs",
+              url: "https://express-rate-limit.mintlify.app",
+            },
+            {
+              label: "OWASP – Rate Limiting",
+              url: "https://owasp.org/www-community/controls/Blocking_Brute_Force_Attacks",
+            },
+            {
+              label: "Redis – Rate Limiting patterns",
+              url: "https://redis.io/learn/develop/dotnet/aspnetcore/rate-limiting/sliding-window",
+            },
+            {
+              label: "Helmet.js – HTTP headers security",
+              url: "https://helmetjs.github.io",
+            },
+          ],
+        },
+        {
+          w: 13,
+          ph: 2,
+          topic: "Cron Jobs & Scheduled Tasks",
+          assign: "Scheduler Service",
+          project:
+            "Build a scheduler service using node-cron: daily digest emails, weekly report generation, cleanup expired tokens, and retry failed jobs. Add idempotency keys and distributed locking (Redis) to prevent duplicate execution.",
+          interview: [
+            "Cron syntax",
+            "Distributed locking",
+            "Idempotency",
+            "At-least-once vs exactly-once delivery",
+          ],
+          resources: [
+            {
+              label: "node-cron docs",
+              url: "https://github.com/kelektiv/node-cron",
+            },
+            {
+              label: "YouTube – Cron Jobs explained",
+              url: "https://www.youtube.com/results?search_query=node+js+cron+jobs+explained",
+            },
+            {
+              label: "Redis – Distributed Locks (Redlock)",
+              url: "https://redis.io/docs/manual/patterns/distributed-locks/",
+            },
+            {
+              label: "Crontab Guru – cron expression helper",
+              url: "https://crontab.guru",
+            },
+          ],
+        },
+        {
+          w: 14,
+          ph: 2,
+          topic: "BullMQ – Job Queues",
+          assign: "Notification Queue",
+          project:
+            "Replace cron-based email sending with a BullMQ queue: email notifications, push notifications, and PDF report generation as background jobs. Implement job priorities, retries with exponential backoff, and a Bull Board dashboard.",
+          interview: [
+            "Queue vs pub/sub",
+            "Job priorities & concurrency",
+            "Dead letter queue",
+            "Backpressure",
+            "Horizontal scaling of workers",
+          ],
+          resources: [
+            { label: "BullMQ Official Docs", url: "https://docs.bullmq.io" },
+            {
+              label: "Bull Board – queue UI",
+              url: "https://github.com/felixmosh/bull-board",
+            },
+            {
+              label: "YouTube – Hussein Nasser: Job Queues",
+              url: "https://www.youtube.com/results?search_query=hussein+nasser+job+queues+nodejs",
+            },
+            {
+              label: "Martin Fowler – Message Queue patterns",
+              url: "https://www.enterpriseintegrationpatterns.com/patterns/messaging/",
+            },
+          ],
+        },
+        {
+          w: 15,
+          ph: 2,
+          topic: "AWS S3 & File Storage",
+          assign: "File Upload Service",
+          project:
+            "Build a file upload service: direct client-to-S3 uploads via presigned URLs (never route through your server), file type validation, image thumbnails using Lambda or a worker, and CloudFront CDN delivery.",
+          interview: [
+            "Presigned URLs (PUT vs GET)",
+            "S3 bucket policies",
+            "Multipart upload",
+            "S3 vs EFS vs EBS",
+          ],
+          resources: [
+            {
+              label: "AWS S3 Developer Guide",
+              url: "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html",
+            },
+            {
+              label: "AWS SDK v3 for Node.js",
+              url: "https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/",
+            },
+            {
+              label: "YouTube – Traversy: AWS S3 Node upload",
+              url: "https://www.youtube.com/results?search_query=aws+s3+nodejs+upload+traversy",
+            },
+            { label: "AWS Free Tier", url: "https://aws.amazon.com/free/" },
+          ],
+        },
+        {
+          w: 16,
+          ph: 2,
+          topic: "Transactional Email Systems",
+          assign: "Email Verification Flow",
+          project:
+            "Build a complete email system: welcome emails, email verification (token + expiry), password reset, and weekly digest. Use Nodemailer + SMTP or Resend API. Write React Email templates. Test with Mailtrap.",
+          interview: [
+            "SMTP vs transactional email APIs",
+            "SPF / DKIM / DMARC",
+            "Email deliverability",
+            "Handling bounces & unsubscribes",
+          ],
+          resources: [
+            { label: "Nodemailer Docs", url: "https://nodemailer.com/about/" },
+            {
+              label: "Resend – transactional email API",
+              url: "https://resend.com/docs",
+            },
+            {
+              label: "React Email – email templates",
+              url: "https://react.email/docs/introduction",
+            },
+            { label: "Mailtrap – email testing", url: "https://mailtrap.io" },
+          ],
+        },
+        {
+          w: 17,
+          ph: 2,
+          topic: "WebSockets & Realtime",
+          assign: "Realtime Chat App",
+          project:
+            "Build a realtime chat application using Socket.io: rooms, private messages, typing indicators, online presence, and message history (stored in PostgreSQL). Handle reconnection, authentication over WS, and horizontal scaling with Redis adapter.",
+          interview: [
+            "WebSocket handshake",
+            "Long polling vs SSE vs WebSockets",
+            "Socket.io namespaces & rooms",
+            "Scaling WebSockets",
+          ],
+          resources: [
+            { label: "Socket.io Docs", url: "https://socket.io/docs/v4/" },
+            {
+              label: "Socket.io Redis Adapter",
+              url: "https://socket.io/docs/v4/redis-adapter/",
+            },
+            {
+              label: "YouTube – Traversy: Socket.io Chat",
+              url: "https://www.youtube.com/results?search_query=socket+io+chat+app+traversy+media",
+            },
+            {
+              label: "MDN – WebSockets API",
+              url: "https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API",
+            },
+          ],
+        },
+        {
+          w: 18,
+          ph: 2,
+          topic: "Payments & Webhooks",
+          assign: "Subscription Module",
+          project:
+            "Integrate Razorpay (or Stripe) for a SaaS subscription module: one-time payments, recurring subscriptions, webhook verification (signature check), invoice generation, and failed payment retry logic using BullMQ.",
+          interview: [
+            "Payment gateway flow",
+            "Webhook idempotency",
+            "PCI compliance basics",
+            "Subscription lifecycle",
+            "Refund handling",
+          ],
+          resources: [
+            { label: "Razorpay Docs", url: "https://razorpay.com/docs/" },
+            {
+              label: "Stripe Docs (internationally relevant)",
+              url: "https://stripe.com/docs",
+            },
+            {
+              label: "YouTube – Razorpay Node.js integration",
+              url: "https://www.youtube.com/results?search_query=razorpay+nodejs+integration",
+            },
+            {
+              label: "Webhook.site – test webhooks",
+              url: "https://webhook.site",
+            },
+          ],
+        },
+        {
+          w: 19,
+          ph: 3,
+          topic: "Testing – Unit, Integration & E2E",
+          assign: "Full API Test Suite",
+          project:
+            "Write a comprehensive test suite for the existing backend: unit tests for services (Jest + mocks), integration tests for API routes (Supertest + test DB), and contract tests. Achieve >80% code coverage. Add tests to CI.",
+          interview: [
+            "Unit vs integration vs E2E",
+            "Test doubles (mock/stub/spy)",
+            "Test pyramid",
+            "TDD red-green-refactor",
+            "Testing async code",
+          ],
+          resources: [
+            {
+              label: "Jest Official Docs",
+              url: "https://jestjs.io/docs/getting-started",
+            },
+            {
+              label: "Supertest – HTTP testing",
+              url: "https://github.com/ladjs/supertest",
+            },
+            {
+              label: "YouTube – Laith Academy: Node.js Testing",
+              url: "https://www.youtube.com/results?search_query=node+js+testing+jest+supertest",
+            },
+            {
+              label: "Testing Library principles",
+              url: "https://testing-library.com/docs/guiding-principles",
+            },
+          ],
+        },
+        {
+          w: 20,
+          ph: 3,
+          topic: "Linux & Server Administration",
+          assign: "Manual Deployment",
+          project:
+            "Provision a fresh Ubuntu VPS (DigitalOcean/AWS EC2 free tier). Deploy the Node.js app manually: install Node via nvm, configure Nginx as reverse proxy, set up SSL with Certbot, manage the process with PM2, and configure UFW firewall.",
+          interview: [
+            "Linux file permissions",
+            "systemd vs PM2",
+            "Nginx config (proxy_pass)",
+            "SSL/TLS termination",
+            "SSH key auth",
+          ],
+          resources: [
+            {
+              label: "DigitalOcean – Deploy Node on Ubuntu",
+              url: "https://www.digitalocean.com/community/tutorials/how-to-set-up-a-node-js-application-for-production-on-ubuntu-22-04",
+            },
+            {
+              label: "PM2 Docs",
+              url: "https://pm2.keymetrics.io/docs/usage/quick-start/",
+            },
+            {
+              label: "Nginx Beginner's Guide",
+              url: "https://nginx.org/en/docs/beginners_guide.html",
+            },
+            {
+              label: "Linux Command Line (free book)",
+              url: "https://linuxcommand.org/tlcl.php",
+            },
+          ],
+        },
+        {
+          w: 21,
+          ph: 3,
+          topic: "Docker & Containerisation",
+          assign: "Containerise Apps",
+          project:
+            "Containerise the full app stack: Dockerfile for Node.js (multi-stage build), docker-compose.yml with Node + PostgreSQL + Redis + Nginx. Write a .dockerignore, use non-root user, pin image versions, and optimise layer caching.",
+          interview: [
+            "Layers & caching",
+            "Multi-stage builds",
+            "bind mounts vs volumes",
+            "Bridge vs host networking",
+            "Container vs VM",
+          ],
+          resources: [
+            {
+              label: "Docker Official Docs",
+              url: "https://docs.docker.com/get-started/",
+            },
+            {
+              label: "Docker Compose Docs",
+              url: "https://docs.docker.com/compose/",
+            },
+            {
+              label: "YouTube – TechWorld with Nana: Docker crash course",
+              url: "https://www.youtube.com/results?search_query=techworld+with+nana+docker+crash+course",
+            },
+            {
+              label: "Dive – Docker image analyser",
+              url: "https://github.com/wagoodman/dive",
+            },
+          ],
+        },
+        {
+          w: 22,
+          ph: 3,
+          topic: "CI/CD with GitHub Actions",
+          assign: "GitHub Actions Pipeline",
+          project:
+            "Build a full CI/CD pipeline: lint + type-check on every PR, run test suite, build Docker image & push to ECR, deploy to EC2 on merge to main. Add environment secrets management and Slack notifications on deploy.",
+          interview: [
+            "CI vs CD vs CD",
+            "Blue-green vs canary deployments",
+            "GitHub Actions workflow syntax",
+            "Secrets management",
+            "Rollback strategy",
+          ],
+          resources: [
+            {
+              label: "GitHub Actions Docs",
+              url: "https://docs.github.com/en/actions",
+            },
+            {
+              label: "YouTube – TechWorld with Nana: CI/CD Pipeline",
+              url: "https://www.youtube.com/results?search_query=techworld+nana+ci+cd+github+actions",
+            },
+            {
+              label: "AWS ECR – Docker registry",
+              url: "https://docs.aws.amazon.com/ecr/",
+            },
+            {
+              label: "act – run GitHub Actions locally",
+              url: "https://github.com/nektos/act",
+            },
+          ],
+        },
+        {
+          w: 23,
+          ph: 3,
+          topic: "AWS Deployment",
+          assign: "EC2 + RDS Setup",
+          project:
+            "Deploy the full stack on AWS: EC2 with Docker, RDS PostgreSQL (free tier), ElastiCache Redis, S3 for files, Application Load Balancer, and Route 53 for a custom domain. Use IAM roles (not access keys) for EC2-to-AWS auth.",
+          interview: [
+            "EC2 instance types",
+            "RDS vs self-managed DB",
+            "Security Groups vs NACLs",
+            "IAM roles vs users",
+            "VPC fundamentals",
+          ],
+          resources: [
+            {
+              label: "AWS – Deploy containers on EC2",
+              url: "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/docker-basics.html",
+            },
+            {
+              label: "AWS RDS Getting Started",
+              url: "https://aws.amazon.com/rds/getting-started/",
+            },
+            {
+              label: "YouTube – Akamai (Linode): AWS fundamentals",
+              url: "https://www.youtube.com/results?search_query=aws+fundamentals+for+developers+2024",
+            },
+            {
+              label: "AWS Well-Architected Framework",
+              url: "https://docs.aws.amazon.com/wellarchitected/latest/framework/welcome.html",
+            },
+          ],
+        },
+        {
+          w: 24,
+          ph: 3,
+          topic: "System Design",
+          assign: "URL Shortener Design",
+          project:
+            "Design a production URL shortener (like bit.ly) end-to-end: requirements, capacity estimation, data model, API design, base62 encoding, caching strategy, DB choices, and CDN. Draw architecture diagrams and write a design doc.",
+          interview: [
+            "CAP theorem",
+            "Horizontal vs vertical scaling",
+            "Consistent hashing",
+            "Database sharding",
+            "Read replicas",
+          ],
+          resources: [
+            {
+              label: "System Design Primer (GitHub)",
+              url: "https://github.com/donnemartin/system-design-primer",
+            },
+            {
+              label: "ByteByteGo Newsletter",
+              url: "https://blog.bytebytego.com",
+            },
+            {
+              label: "YouTube – ByteByteGo: URL Shortener design",
+              url: "https://www.youtube.com/results?search_query=bytebytego+url+shortener+system+design",
+            },
+            {
+              label: "Designing Data-Intensive Applications (book)",
+              url: "https://dataintensive.net",
+            },
+          ],
+        },
+        {
+          w: 25,
+          ph: 3,
+          topic: "Monitoring, Logging & Security",
+          assign: "Sentry + Structured Logs",
+          project:
+            "Add observability to the deployed app: Sentry for error tracking with release tagging, pino for structured JSON logging, log shipping to Logtail/Datadog, uptime monitoring (Better Uptime), and a security audit (npm audit, Snyk, OWASP ZAP scan).",
+          interview: [
+            "XSS vs CSRF vs SQL injection",
+            "OWASP Top 10",
+            "Structured logging",
+            "Distributed tracing",
+            "APM vs logging vs metrics",
+          ],
+          resources: [
+            {
+              label: "Sentry – Node.js SDK",
+              url: "https://docs.sentry.io/platforms/javascript/guides/node/",
+            },
+            { label: "pino – fast JSON logger", url: "https://getpino.io" },
+            {
+              label: "OWASP Top 10",
+              url: "https://owasp.org/www-project-top-ten/",
+            },
+            {
+              label: "Snyk – dependency security scanning",
+              url: "https://snyk.io",
+            },
+          ],
+        },
+        {
+          w: 26,
+          ph: 3,
+          topic: "Capstone – SaaS Project Management Platform",
+          assign: "Full Architecture + Deployment",
+          project:
+            "Build and deploy the complete SaaS capstone: Next.js frontend + Node/Express backend with all features (auth, teams, roles, projects, tasks, comments, realtime, file uploads, payments, email). Fully containerised on AWS with CI/CD, monitoring, and a polished README.",
+          interview: [
+            "End-to-end architecture walkthrough",
+            "Trade-off decisions",
+            "What you'd do differently",
+            "Scaling bottlenecks",
+            "Live demo",
+          ],
+          resources: [
+            { label: "Next.js Docs", url: "https://nextjs.org/docs" },
+            {
+              label: "TanStack Query Docs",
+              url: "https://tanstack.com/query/latest",
+            },
+            { label: "Tailwind CSS Docs", url: "https://tailwindcss.com/docs" },
+            {
+              label: "README Best Practices",
+              url: "https://github.com/othneildrew/Best-README-Template",
+            },
+          ],
+        },
+      ];
+
+      const PHASES = [
+        {
+          id: 0,
+          label: "Phase 1 — Backend Core",
+          range: "Wk 1–6",
+          milestone: "Comfortable backend developer",
+        },
+        {
+          id: 1,
+          label: "Phase 2 — Database & Cache",
+          range: "Wk 7–12",
+          milestone: "Production backend features",
+        },
+        {
+          id: 2,
+          label: "Phase 3 — Advanced Backend",
+          range: "Wk 13–18",
+          milestone: "Advanced backend engineer",
+        },
+        {
+          id: 3,
+          label: "Phase 4 — DevOps & Scale",
+          range: "Wk 19–26",
+          milestone: "Portfolio-ready full stack engineer",
+        },
+      ];
+
+      function loadData() {
+        try {
+          return JSON.parse(localStorage.getItem("fst2") || "{}");
+        } catch {
+          return {};
+        }
+      }
+      function saveData(d) {
+        localStorage.setItem("fst2", JSON.stringify(d));
+      }
+      let D = loadData(),
+        activePhase = 0,
+        openWeek = null;
+
+      function build() {
+        const nav = document.getElementById("phase-nav");
+        const panels = document.getElementById("panels");
+        nav.innerHTML = "";
+        panels.innerHTML = "";
+
+        PHASES.forEach((ph) => {
+          const btn = document.createElement("button");
+          btn.className = "ph-btn" + (ph.id === activePhase ? " on" : "");
+          btn.textContent = ph.label + " (" + ph.range + ")";
+          btn.onclick = () => {
+            activePhase = ph.id;
+            build();
+          };
+          nav.appendChild(btn);
+
+          const panel = document.createElement("div");
+          panel.className =
+            "phase-panel" + (ph.id === activePhase ? " on" : "");
+
+          panel.innerHTML = `<div class="milestone-row" style="margin-top:24px">milestone &rarr; <span>${ph.milestone}</span></div>`;
+
+          const list = document.createElement("div");
+          list.className = "week-list";
+          WEEKS.filter((w) => w.ph === ph.id).forEach((w) => {
+            list.appendChild(makeRow(w));
+          });
+          panel.appendChild(list);
+          panels.appendChild(panel);
+        });
+
+        updateStats();
+      }
+
+      function makeRow(w) {
+        const d = D[w.w] || {};
+        const st = d.status || "pending";
+        const stMap = {
+          done: "s-done",
+          "in-progress": "s-prog",
+          pending: "s-pending",
+        };
+        const badgeMap = {
+          done: "badge-done",
+          "in-progress": "badge-prog",
+          pending: "badge-pending",
+        };
+        const badgeTxt = {
+          done: "done",
+          "in-progress": "active",
+          pending: "pending",
+        };
+
+        const row = document.createElement("div");
+        row.className = "wrow " + stMap[st];
+        row.id = "wrow-" + w.w;
+
+        const isOpen = openWeek === w.w;
+        row.innerHTML = `
+    <div class="wrow-head" onclick="toggle(${w.w})">
+      <span class="wnum">wk ${String(w.w).padStart(2, "0")}</span>
+      <span class="wtopic">${w.topic}</span>
+      <span class="wassign">${w.assign}</span>
+      <span class="wbadge ${badgeMap[st]}">${badgeTxt[st]}</span>
+      <span class="wdate">${d.date || ""}</span>
+    </div>
+    <div class="wrow-body ${isOpen ? "open" : ""}" id="body-${w.w}">
+      <div class="body-inner">
+        <div>
+          <div class="sect-head">Practice Project</div>
+          <div class="sect-body">${w.project}</div>
+        </div>
+        <div>
+          <div class="sect-head">Resources</div>
+          <ul class="resource-list">
+            ${w.resources.map((r) => `<li><a href="${r.url}" target="_blank">${r.label}</a></li>`).join("")}
+          </ul>
+          <div class="sect-head" style="margin-top:12px">Interview Focus</div>
+          <div>${w.interview.map((i) => `<span class="focus-tag">${i}</span>`).join("")}</div>
+        </div>
+        <div class="form-sect">
+          <div class="form-row">
+            <div>
+              <label class="fl">Status</label>
+              <select id="sel-${w.w}" onchange="quickSave(${w.w})">
+                <option value="pending" ${st === "pending" ? "selected" : ""}>pending</option>
+                <option value="in-progress" ${st === "in-progress" ? "selected" : ""}>in progress</option>
+                <option value="done" ${st === "done" ? "selected" : ""}>done</option>
+              </select>
+            </div>
+            <div>
+              <label class="fl">Completed on</label>
+              <input type="date" id="date-${w.w}" value="${d.date || ""}" onchange="quickSave(${w.w})">
+            </div>
+            <div>
+              <label class="fl">GitHub / Notes</label>
+              <input type="text" id="link-${w.w}" placeholder="repo link or notes..." value="${d.link || ""}"
+                style="font-family:var(--mono);font-size:12px;background:var(--bg);border:1px solid var(--line2);border-radius:4px;color:var(--text);padding:7px 10px;outline:none;width:100%;">
+            </div>
+            <div class="notes-wrap">
+              <label class="fl">Notes</label>
+              <textarea id="note-${w.w}" placeholder="learnings, blockers, resources used...">${d.notes || ""}</textarea>
+            </div>
+            <div class="save-row">
+              <button class="save-btn" onclick="saveRow(${w.w})">save →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+        return row;
+      }
+
+      function toggle(week) {
+        openWeek = openWeek === week ? null : week;
+        build();
+        if (openWeek) {
+          setTimeout(() => {
+            const el = document.getElementById("wrow-" + openWeek);
+            if (el) el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          }, 50);
+        }
+      }
+
+      function quickSave(week) {
+        const sel = document.getElementById("sel-" + week);
+        const date = document.getElementById("date-" + week);
+        if (!D[week]) D[week] = {};
+        D[week].status = sel.value;
+        D[week].date = date.value;
+        saveData(D);
+        const row = document.getElementById("wrow-" + week);
+        row.className =
+          "wrow " +
+          { done: "s-done", "in-progress": "s-prog", pending: "s-pending" }[
+            sel.value
+          ];
+        const badge = row.querySelector(".wbadge");
+        badge.className =
+          "wbadge " +
+          {
+            done: "badge-done",
+            "in-progress": "badge-prog",
+            pending: "badge-pending",
+          }[sel.value];
+        badge.textContent = {
+          done: "done",
+          "in-progress": "active",
+          pending: "pending",
+        }[sel.value];
+        row.querySelector(".wdate").textContent = date.value;
+        updateStats();
+      }
+
+      function saveRow(week) {
+        const sel = document.getElementById("sel-" + week);
+        const date = document.getElementById("date-" + week);
+        const note = document.getElementById("note-" + week);
+        const link = document.getElementById("link-" + week);
+        if (!D[week]) D[week] = {};
+        D[week].status = sel.value;
+        D[week].date = date.value;
+        D[week].notes = note.value;
+        D[week].link = link.value;
+        saveData(D);
+        openWeek = null;
+        build();
+      }
+
+      function updateStats() {
+        const vals = WEEKS.map((w) => (D[w.w] || {}).status || "pending");
+        const done = vals.filter((v) => v === "done").length;
+        const prog = vals.filter((v) => v === "in-progress").length;
+        document.getElementById("n-done").textContent = done;
+        document.getElementById("n-prog").textContent = prog;
+        document.getElementById("n-rem").textContent = 26 - done - prog;
+        document.getElementById("pct-lbl").textContent =
+          done + " / 26 weeks complete";
+        document.getElementById("prog-fill").style.width =
+          Math.round((done / 26) * 100) + "%";
+      }
+
+      build();
+    </script>
+  </body>
+</html>
